@@ -1,4 +1,4 @@
-# PDF to Office 変換スクリプト
+# PDF to DOCX / PPTX Converter
 
 PDFファイルをPowerPoint（`.pptx`）またはWord（`.docx`）に変換するPythonスクリプトです。
 
