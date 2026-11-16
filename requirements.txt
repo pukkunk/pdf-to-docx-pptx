@@ -1,0 +1,4 @@
+pypdfium2
+python-pptx
+python-docx
+Pillow
