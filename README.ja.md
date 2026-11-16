@@ -17,6 +17,7 @@ PDFの各ページを画像として出力し、PowerPointではスライド全�
 - 出力ファイルの保存先を指定可能
 - INI設定ファイルで既存ファイルの上書き可否を制御
 - DOCX版とPPTX版で共通のPDF処理コードを使用
+- uvによるPython環境と依存パッケージの管理
 
 ## 変換スクリプト
 
@@ -29,27 +30,33 @@ PDFの各ページを画像として出力し、PowerPointではスライド全�
 
 ## 動作環境・必要なもの
 
-- Python 3.8以降
-- [`requirements.txt`](requirements.txt) に記載したPythonパッケージ
+- Windows 10 / 11
+- Python 3.11以降
+- [uv](https://docs.astral.sh/uv/)
 
 変換処理そのものにMicrosoft PowerPointやMicrosoft Wordは必要ありません。変換後のファイルを開いて編集する場合に、Officeまたは互換ソフトが必要です。
 
 ## ファイル構成
 
 ```text
-pdf-converter/
+pdf-to-docx-pptx/
+├── LICENSE
 ├── pdf_converter_common.py
+├── pdf_to_docx.bat
 ├── pdf_to_docx.ini
 ├── pdf_to_docx.py
+├── pdf_to_pptx.bat
 ├── pdf_to_pptx.ini
 ├── pdf_to_pptx.py
+├── pyproject.toml
+├── uv.lock
+├── requirements.txt
 ├── README.md
 ├── README.ja.md
 ├── README_DOCX.md
 ├── README_DOCX.ja.md
 ├── README_PPTX.md
-├── README_PPTX.ja.md
-└── requirements.txt
+└── README_PPTX.ja.md
 ```
 
 | ファイル名 | 説明 |
@@ -57,30 +64,85 @@ pdf-converter/
 | `pdf_converter_common.py` | PDFの読み込み、検証、ページ処理などの共通関数 |
 | `pdf_to_docx.py` | PDFをWordファイルに変換するスクリプト |
 | `pdf_to_pptx.py` | PDFをPowerPointファイルに変換するスクリプト |
+| `pdf_to_docx.bat` | DOCX変換を実行するWindowsバッチファイル |
+| `pdf_to_pptx.bat` | PPTX変換を実行するWindowsバッチファイル |
 | `pdf_to_docx.ini` | DOCX変換用の上書き設定 |
 | `pdf_to_pptx.ini` | PPTX変換用の上書き設定 |
-| `requirements.txt` | Pythonパッケージの依存関係 |
+| `pyproject.toml` | プロジェクト情報と依存パッケージの定義 |
+| `uv.lock` | 依存パッケージのバージョン固定情報 |
+| `requirements.txt` | pip用の依存パッケージ一覧 |
 | `README.md` / `README.ja.md` | プロジェクト全体の説明（英語・日本語） |
 | `README_DOCX.md` / `README_DOCX.ja.md` | DOCX変換の説明（英語・日本語） |
 | `README_PPTX.md` / `README_PPTX.ja.md` | PPTX変換の説明（英語・日本語） |
+| `LICENSE` | ライセンス |
 
 ## インストール
 
+### 1. uvのインストール
+
+uvがインストールされていない場合は、公式サイトの手順に従ってインストールしてください。
+
+https://docs.astral.sh/uv/getting-started/installation/
+
+### 2. リポジトリの取得
+
+```cmd
+git clone https://github.com/pukkunk/pdf-to-docx-pptx.git
+cd pdf-to-docx-pptx
+```
+
+### 3. Python環境の構築
+
 プロジェクトのフォルダーで、次のコマンドを実行してください。
 
-```text
-python -m pip install -r requirements.txt
+```cmd
+uv sync
 ```
+
+`pyproject.toml` と `uv.lock` に基づいて仮想環境が作成され、必要な依存パッケージがインストールされます。
 
 ## 基本的な使い方
 
 入力PDFを指定して、出力形式に対応するスクリプトを実行します。
 
-```text
-python pdf_to_pptx.py input.pdf
+### PowerPoint（PPTX）への変換
+
+```cmd
+uv run pdf_to_pptx.py input.pdf
 ```
 
-```text
+### Word（DOCX）への変換
+
+```cmd
+uv run pdf_to_docx.py input.pdf
+```
+
+### バッチファイルから実行
+
+Windowsでは、付属のバッチファイルを利用できます。
+
+```cmd
+pdf_to_pptx.bat input.pdf
+```
+
+```cmd
+pdf_to_docx.bat input.pdf
+```
+
+バッチファイルはuvのインストール先を検索し、見つからない場合は公式インストーラーによるインストールを試みます。
+
+### 従来のpipによるインストール
+
+uvを使用しない場合は、Python環境に対して以下のコマンドで依存パッケージをインストールできます。
+
+```cmd
+python -m pip install -r requirements.txt
+```
+
+インストール後は、次のように実行できます。
+
+```cmd
+python pdf_to_pptx.py input.pdf
 python pdf_to_docx.py input.pdf
 ```
 

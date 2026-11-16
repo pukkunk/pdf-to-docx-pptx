@@ -1,0 +1,30 @@
+[project]
+name = "pdf-to-docx-pptx"
+version = "0.0.2"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "pukkunk"}
+]
+requires-python = ">=3.11"
+dependencies = [
+    "pillow>=13.0.0",
+    "pypdfium2>=5.15.2",
+    "python-docx>=1.2.0",
+    "python-pptx>=1.0.2",
+]
+
+[project.scripts]
+pdf_to_docx = "pdf_to_docx:main"
+pdf_to_pptx = "pdf_to_pptx:main"
+
+[build-system]
+requires = ["uv_build>=0.13.6,<0.14.0"]
+build-backend = "uv_build"
+
+[tool.setuptools]
+py-modules = [
+    "pdf_to_docx",
+    "pdf_to_pptx",
+    "pdf_converter_common",
+]

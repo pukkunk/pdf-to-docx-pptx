@@ -6,7 +6,7 @@
 
 A Python script for converting PDF files into Word (DOCX) documents.
 
-Each PDF page is rendered as an image and positioned behind the text on a corresponding Word page.
+Each PDF page is rendered as an image and positioned as the background of the corresponding Word page.
 
 The original PDF page dimensions are applied to the Word page size.
 
@@ -18,8 +18,7 @@ The original layout and Japanese text appearance are preserved. Text and shapes 
 - Multi-page PDF support
 - Automatic PDF page size detection
 - Original page dimensions
-- Page images positioned behind text
-- Separate page images for each page
+- PDF page images placed as page backgrounds
 - Configurable image resolution (DPI)
 - Custom output filename
 - INI-based overwrite control
@@ -29,18 +28,28 @@ The original layout and Japanese text appearance are preserved. Text and shapes 
 
 - `pdf_to_docx.py`
 - `pdf_converter_common.py`
+- `pdf_to_docx.bat` (Windows launcher)
 - `pdf_to_docx.ini` (created automatically on first execution)
 
 ## Requirements
 
-- Python 3.8 or later
+- Python 3.11 or later
+- uv (recommended) or pip
 - pypdfium2
 - python-docx
 - Pillow
 
 ## Installation
 
-Install the project dependencies from the project root directory.
+Run the following command in the project root directory.
+
+### Using uv (recommended)
+
+```cmd
+uv sync
+```
+
+This installs the dependencies defined in `pyproject.toml`.
 
 ### Using pip
 
@@ -48,31 +57,67 @@ Install the project dependencies from the project root directory.
 python -m pip install -r requirements.txt
 ```
 
+The `requirements.txt` file provides the dependency list for pip users.
+
 ## Usage
 
 ### Basic conversion
 
+#### Windows
+
 ```cmd
-python pdf_to_docx.py sample.pdf
+pdf_to_docx.bat sample.pdf
+```
+
+#### Linux / macOS
+
+```bash
+uv run python pdf_to_docx.py sample.pdf
 ```
 
 The output file `sample.docx` is created in the same directory as the input PDF.
 
 ### Specify output filename
 
+#### Windows
+
 ```cmd
-python pdf_to_docx.py sample.pdf -o output.docx
+pdf_to_docx.bat sample.pdf -o output.docx
+```
+
+#### Linux / macOS
+
+```bash
+uv run python pdf_to_docx.py sample.pdf -o output.docx
 ```
 
 ### Specify image resolution
 
 The default resolution is 300 DPI.
 
+#### Windows
+
 ```cmd
-python pdf_to_docx.py sample.pdf --dpi 400
+pdf_to_docx.bat sample.pdf --dpi 400
+```
+
+#### Linux / macOS
+
+```bash
+uv run python pdf_to_docx.py sample.pdf --dpi 400
 ```
 
 Higher DPI produces sharper images but increases the output file size.
+
+### Running with pip
+
+If dependencies were installed with pip, run the Python script directly:
+
+```cmd
+python pdf_to_docx.py sample.pdf
+```
+
+The same command-line options can be used.
 
 ## INI Configuration
 
@@ -104,30 +149,24 @@ All pages must have the same dimensions.
 
 If a page has different dimensions from the first page, conversion is terminated with an error.
 
-## Word Background Images
+## Using the Document in Word
 
-Each PDF page image is placed in the Word header area and positioned relative to the page.
+Each PDF page is placed as the background of the corresponding Word page.
 
-The image is placed behind the text.
+Text and shapes can be added on top of the image.
 
-This allows users to add text and shapes on top of the original PDF page image.
-
-Each page can have its own image, including multi-page documents.
+The original PDF text is not converted into individually editable Word text.
 
 ## Notes
 
-- PDF text is preserved as part of the page image.
-- The original PDF text is not converted into editable Word text.
-- The background image uses the Word header area. Take care when editing headers.
-- Image position may vary depending on the Word version and printing environment.
+- PDF text, lines, and graphics are preserved as part of the page image.
 - Output file size depends on the selected DPI.
 - PDFs with different page dimensions are not supported.
 - Password-protected PDFs may need to be unlocked separately.
-- PDFs exceeding Word page-size limits may not be supported.
+- Display and editing results may vary depending on the Word-compatible application being used.
 
 ## License
 
 MIT License
 
 See [LICENSE](LICENSE) for details.
-

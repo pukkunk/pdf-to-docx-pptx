@@ -28,18 +28,28 @@ The original layout and Japanese text appearance are preserved. Text boxes and s
 
 - `pdf_to_pptx.py`
 - `pdf_converter_common.py`
+- `pdf_to_pptx.bat` (Windows launcher)
 - `pdf_to_pptx.ini` (created automatically on first execution)
 
 ## Requirements
 
-- Python 3.8 or later
+- Python 3.11 or later
+- uv (recommended) or pip
 - pypdfium2
 - python-pptx
 - Pillow
 
 ## Installation
 
-Install the project dependencies from the project root directory.
+Run the following command in the project root directory.
+
+### Using uv (recommended)
+
+```cmd
+uv sync
+```
+
+This installs the dependencies defined in `pyproject.toml`.
 
 ### Using pip
 
@@ -47,31 +57,67 @@ Install the project dependencies from the project root directory.
 python -m pip install -r requirements.txt
 ```
 
+The `requirements.txt` file provides the dependency list for pip users.
+
 ## Usage
 
 ### Basic conversion
 
+#### Windows
+
 ```cmd
-python pdf_to_pptx.py sample.pdf
+pdf_to_pptx.bat sample.pdf
+```
+
+#### Linux / macOS
+
+```bash
+uv run python pdf_to_pptx.py sample.pdf
 ```
 
 The output file `sample.pptx` is created in the same directory as the input PDF.
 
 ### Specify output filename
 
+#### Windows
+
 ```cmd
-python pdf_to_pptx.py sample.pdf -o output.pptx
+pdf_to_pptx.bat sample.pdf -o output.pptx
+```
+
+#### Linux / macOS
+
+```bash
+uv run python pdf_to_pptx.py sample.pdf -o output.pptx
 ```
 
 ### Specify image resolution
 
 The default resolution is 300 DPI.
 
+#### Windows
+
 ```cmd
-python pdf_to_pptx.py sample.pdf --dpi 400
+pdf_to_pptx.bat sample.pdf --dpi 400
+```
+
+#### Linux / macOS
+
+```bash
+uv run python pdf_to_pptx.py sample.pdf --dpi 400
 ```
 
 Higher DPI produces sharper images but increases the output file size.
+
+### Running with pip
+
+If dependencies were installed with pip, run the Python script directly:
+
+```cmd
+python pdf_to_pptx.py sample.pdf
+```
+
+The same command-line options can be used.
 
 ## INI Configuration
 
@@ -124,4 +170,3 @@ The original PDF text and graphics are not converted into individually editable 
 MIT License
 
 See [LICENSE](LICENSE) for details.
-

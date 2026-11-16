@@ -1,18 +1,47 @@
+# coding: utf-8
+# Copyright (c) 2026 pukkunk
 # pdf_to_docx.py
 
 from copy import deepcopy
 from io import BytesIO
+import platform
 
-from docx import Document
-from docx.enum.section import WD_SECTION
-from docx.shared import Pt
-from docx.oxml import OxmlElement
-from docx.oxml.ns import qn
+try:
+    from docx import Document
+    from docx.enum.section import WD_SECTION
+    from docx.shared import Pt
+    from docx.oxml import OxmlElement
+except ImportError as e:
+    print(f"ERROR: {e}")
+    print("Install the required library using:")
+    print("    uv add python-docx")
+    raise SystemExit(1)
 
 from pdf_converter_common import (
     execute_converter,
     render_pdf_pages,
 )
+
+
+__version_short__ = (
+    f"0.0.1, python={platform.python_version()} "
+    f"{platform.architecture()[0]}"
+)
+__version__ = f"{__version_short__}\n"
+__copyright__ = "pukkunk"
+__author__ = "pukkunk"
+
+
+def main() -> int:
+    return execute_converter(
+        script_path=__file__,
+        description="PDF to Word Converter\n",
+        output_ext=".docx",
+        converter=convert_to_docx,
+        version=__version__,
+        copyright=__copyright__,
+        author=__author__
+    )
 
 
 def set_picture_behind_text(
@@ -22,8 +51,8 @@ def set_picture_behind_text(
     height_pt
 ):
     """
-    Word画像をページ左上基準の絶対位置に配置し、
-    文字の背面に設定する。
+    Place a Word image at an absolute position relative to the
+    top-left corner of the page, behind the text.
     """
 
     run = paragraph.add_run()
@@ -49,13 +78,13 @@ def set_picture_behind_text(
     anchor.set("layoutInCell", "1")
     anchor.set("allowOverlap", "1")
 
-    # 単純位置
+    # Simple position
     simple_pos = OxmlElement("wp:simplePos")
     simple_pos.set("x", "0")
     simple_pos.set("y", "0")
     anchor.append(simple_pos)
 
-    # 水平方向
+    # Horizontal position
     position_h = OxmlElement("wp:positionH")
     position_h.set("relativeFrom", "page")
 
@@ -65,7 +94,7 @@ def set_picture_behind_text(
     position_h.append(pos_offset_h)
     anchor.append(position_h)
 
-    # 垂直方向
+    # Vertical position
     position_v = OxmlElement("wp:positionV")
     position_v.set("relativeFrom", "page")
 
@@ -75,10 +104,10 @@ def set_picture_behind_text(
     position_v.append(pos_offset_v)
     anchor.append(position_v)
 
-    # サイズ
+    # Size
     anchor.append(deepcopy(inline.extent))
 
-    # 効果範囲
+    # Effect extent
     effect_extent = OxmlElement("wp:effectExtent")
     effect_extent.set("l", "0")
     effect_extent.set("t", "0")
@@ -86,24 +115,25 @@ def set_picture_behind_text(
     effect_extent.set("b", "0")
     anchor.append(effect_extent)
 
-    # テキスト回り込みなし
+    # No text wrapping
     anchor.append(OxmlElement("wp:wrapNone"))
 
-    # 図形情報
+    # Drawing properties
     anchor.append(deepcopy(inline.docPr))
 
-    # cNvGraphicFramePrを新規作成
+    # Create a new cNvGraphicFramePr element
     c_nv = OxmlElement("wp:cNvGraphicFramePr")
     anchor.append(c_nv)
 
-    # 画像本体
+    # Image content
     anchor.append(deepcopy(inline.graphic))
 
-    # inline画像をanchor画像に置き換える
+    # Replace the inline image with the anchored image
     inline.getparent().replace(inline, anchor)
 
+
 def clear_header(header):
-    """ヘッダーの既存内容をクリア"""
+    """Clear existing header content."""
 
     for paragraph in header.paragraphs:
         paragraph.clear()
@@ -116,7 +146,7 @@ def convert_to_docx(
     height_pt,
     dpi
 ):
-    """PDFをWordに変換する"""
+    """Convert PDF to Word."""
 
     doc = Document()
 
@@ -132,11 +162,11 @@ def convert_to_docx(
                 WD_SECTION.NEW_PAGE
             )
 
-        # ページサイズをPDFと同じにする
+        # Set the page size to match the PDF
         section.page_width = Pt(width_pt)
         section.page_height = Pt(height_pt)
 
-        # 余白を0に設定
+        # Set all margins to zero
         section.top_margin = Pt(0)
         section.bottom_margin = Pt(0)
         section.left_margin = Pt(0)
@@ -145,7 +175,7 @@ def convert_to_docx(
         section.header_distance = Pt(0)
         section.footer_distance = Pt(0)
 
-        # セクションごとに独立したヘッダーを設定
+        # Use an independent header for each section
         section.header.is_linked_to_previous = False
 
         header = section.header
@@ -153,7 +183,7 @@ def convert_to_docx(
 
         paragraph = header.paragraphs[0]
 
-        # 背景画像を設定
+        # Set the background image
         stream = BytesIO()
         image.save(stream, format="PNG")
         stream.seek(0)
@@ -165,18 +195,9 @@ def convert_to_docx(
             height_pt
         )
 
-        print(f"Word: {page_number}ページ目")
+        print(f"Word: Page {page_number}")
 
     doc.save(str(output_path))
-
-
-def main():
-    return execute_converter(
-        script_path=__file__,
-        description="PDF to Word Converter",
-        output_ext=".docx",
-        converter=convert_to_docx
-    )
 
 
 if __name__ == "__main__":

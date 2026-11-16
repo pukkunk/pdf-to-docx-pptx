@@ -1,5 +1,3 @@
-
-
 # PDF to PowerPoint Converter
 
 English version → [README_PPTX.md](README_PPTX.md)
@@ -30,11 +28,13 @@ PDFのレイアウトや日本語文字の表示を維持したまま、PowerPoi
 
 - `pdf_to_pptx.py`
 - `pdf_converter_common.py`
+- `pdf_to_pptx.bat`（Windows用実行ファイル）
 - `pdf_to_pptx.ini`（初回実行時に自動作成）
 
 ## 動作環境
 
-- Python 3.8以上
+- Python 3.11以上
+- uv（推奨）または pip
 
 ## 必要なライブラリ
 
@@ -46,37 +46,81 @@ PDFのレイアウトや日本語文字の表示を維持したまま、PowerPoi
 
 プロジェクトのルートディレクトリで実行します。
 
+### uvによるインストール（推奨）
+
+```cmd
+uv sync
+```
+
+`pyproject.toml` に定義された依存ライブラリがインストールされます。
+
 ### pipによるインストール
 
 ```cmd
 python -m pip install -r requirements.txt
 ```
 
+`requirements.txt` はpipを使用する場合の依存ライブラリ一覧です。
+
 ## 使用方法
 
 ### 基本変換
 
+#### Windows
+
 ```cmd
-python pdf_to_pptx.py sample.pdf
+pdf_to_pptx.bat sample.pdf
+```
+
+#### Linux / macOS
+
+```bash
+uv run python pdf_to_pptx.py sample.pdf
 ```
 
 入力PDFと同じフォルダに `sample.pptx` を作成します。
 
 ### 出力ファイルの指定
 
+#### Windows
+
 ```cmd
-python pdf_to_pptx.py sample.pdf -o output.pptx
+pdf_to_pptx.bat sample.pdf -o output.pptx
+```
+
+#### Linux / macOS
+
+```bash
+uv run python pdf_to_pptx.py sample.pdf -o output.pptx
 ```
 
 ### 画像解像度の指定
 
 デフォルトは300 DPIです。
 
+#### Windows
+
 ```cmd
-python pdf_to_pptx.py sample.pdf --dpi 400
+pdf_to_pptx.bat sample.pdf --dpi 400
+```
+
+#### Linux / macOS
+
+```bash
+uv run python pdf_to_pptx.py sample.pdf --dpi 400
 ```
 
 DPIを大きくすると画像が鮮明になりますが、出力ファイルのサイズも大きくなります。
+
+### pip環境での実行
+
+pipで依存ライブラリをインストールした場合は、Pythonスクリプトを直接実行します。
+
+```cmd
+python pdf_to_pptx.py sample.pdf
+```
+
+オプションも同様に指定できます。
 
 ## INIファイル
 
@@ -129,4 +173,3 @@ PDFの文字自体はPowerPointの編集可能なテキストにはなりませ�
 MIT License
 
 詳細は [LICENSE](LICENSE) を参照してください。
-

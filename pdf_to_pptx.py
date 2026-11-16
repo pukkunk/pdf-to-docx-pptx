@@ -1,12 +1,43 @@
+# coding: utf-8
+# Copyright (c) 2026 pukkunk
 # pdf_to_pptx.py
 
-from pptx import Presentation
-from pptx.util import Pt
+import platform
+
+try:
+    from pptx import Presentation
+    from pptx.util import Pt
+except ImportError as e:
+    print(f"ERROR: {e}")
+    print("Install the required library using:")
+    print("    uv add python-pptx")
+    raise SystemExit(1)
 
 from pdf_converter_common import (
     execute_converter,
     render_pdf_pages,
 )
+
+
+__version_short__ = (
+    f"0.0.1, python={platform.python_version()} "
+    f"{platform.architecture()[0]}"
+)
+__version__ = f"{__version_short__}\n"
+__copyright__ = "pukkunk"
+__author__ = "pukkunk"
+
+
+def main() -> int:
+    return execute_converter(
+        script_path=__file__,
+        description="PDF to PowerPoint Converter.\n",
+        output_ext=".pptx",
+        converter=convert_to_pptx,
+        version=__version__,
+        copyright=__copyright__,
+        author=__author__
+    )
 
 
 def convert_to_pptx(
@@ -56,15 +87,6 @@ def image_to_stream(image):
     stream.seek(0)
 
     return stream
-
-
-def main():
-    return execute_converter(
-        script_path=__file__,
-        description="PDF to PowerPoint Converter",
-        output_ext=".pptx",
-        converter=convert_to_pptx
-    )
 
 
 if __name__ == "__main__":

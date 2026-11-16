@@ -17,6 +17,7 @@ The conversion preserves the appearance and page dimensions of the original PDF 
 - Specify the output file path.
 - Control whether an existing output file can be overwritten through an INI configuration file.
 - Share common PDF processing code between the DOCX and PPTX converters.
+- Manage Python environments and dependencies with uv.
 
 ## Conversion scripts
 
@@ -29,58 +30,119 @@ Choose the script for the output format you need. The command-line options and c
 
 ## Requirements
 
+- Windows 10 / 11
 - Python 3.8 or later
-- Packages listed in [`requirements.txt`](requirements.txt)
+- [uv](https://docs.astral.sh/uv/)
 
 The conversion itself does not require Microsoft PowerPoint or Microsoft Word to be installed. An Office application or compatible software is required only to open and edit the resulting files.
 
 ## Project files
 
 ```text
-pdf-converter/
+pdf-to-docx-pptx/
+├── LICENSE
 ├── pdf_converter_common.py
+├── pdf_to_docx.bat
 ├── pdf_to_docx.ini
 ├── pdf_to_docx.py
+├── pdf_to_pptx.bat
 ├── pdf_to_pptx.ini
 ├── pdf_to_pptx.py
+├── pyproject.toml
+├── uv.lock
+├── requirements.txt
 ├── README.md
 ├── README.ja.md
 ├── README_DOCX.md
 ├── README_DOCX.ja.md
 ├── README_PPTX.md
-├── README_PPTX.ja.md
-└── requirements.txt
+└── README_PPTX.ja.md
 ```
 
 | File | Description |
 |---|---|
+| `LICENSE` | License information |
 | `pdf_converter_common.py` | Common PDF loading, validation, and page-processing functions |
 | `pdf_to_docx.py` | Converts PDF files to Word documents |
 | `pdf_to_pptx.py` | Converts PDF files to PowerPoint presentations |
+| `pdf_to_docx.bat` | Windows batch file for DOCX conversion |
+| `pdf_to_pptx.bat` | Windows batch file for PPTX conversion |
 | `pdf_to_docx.ini` | Overwrite settings for the DOCX converter |
 | `pdf_to_pptx.ini` | Overwrite settings for the PPTX converter |
-| `requirements.txt` | Python package dependencies |
+| `pyproject.toml` | Project metadata and dependency definitions |
+| `uv.lock` | Locked dependency versions |
+| `requirements.txt` | Python package dependencies for pip |
 | `README.md` / `README.ja.md` | Project overview in English and Japanese |
 | `README_DOCX.md` / `README_DOCX.ja.md` | DOCX conversion instructions |
 | `README_PPTX.md` / `README_PPTX.ja.md` | PPTX conversion instructions |
 
 ## Installation
 
+### 1. Install uv
+
+If uv is not installed, follow the official installation instructions:
+
+https://docs.astral.sh/uv/getting-started/installation/
+
+### 2. Clone the repository
+
+```cmd
+git clone https://github.com/pukkunk/pdf-to-docx-pptx.git
+cd pdf-to-docx-pptx
+```
+
+### 3. Set up the Python environment
+
 Run the following command in the project directory:
 
-```text
-python -m pip install -r requirements.txt
+```cmd
+uv sync
 ```
+
+This creates a virtual environment and installs the required packages based on `pyproject.toml` and `uv.lock`.
 
 ## Quick start
 
-Run the appropriate script and specify the input PDF:
+Run the appropriate script and specify the input PDF.
 
-```text
-python pdf_to_pptx.py input.pdf
+### Convert to PowerPoint (PPTX)
+
+```cmd
+uv run pdf_to_pptx.py input.pdf
 ```
 
-```text
+### Convert to Word (DOCX)
+
+```cmd
+uv run pdf_to_docx.py input.pdf
+```
+
+### Run using Windows batch files
+
+You can also use the included batch files on Windows.
+
+```cmd
+pdf_to_pptx.bat input.pdf
+```
+
+```cmd
+pdf_to_docx.bat input.pdf
+```
+
+The batch files search for the uv executable. If it cannot be found, they attempt to install uv using the official installer.
+
+### Install using pip (alternative)
+
+If you prefer not to use uv, install the dependencies into your Python environment using:
+
+```cmd
+python -m pip install -r requirements.txt
+```
+
+Then run the scripts directly:
+
+```cmd
+python pdf_to_pptx.py input.pdf
 python pdf_to_docx.py input.pdf
 ```
 

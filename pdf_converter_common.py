@@ -5,32 +5,29 @@ import configparser
 import sys
 from pathlib import Path
 
-import pypdfium2 as pdfium
-
-
 DEFAULT_DPI = 300
 PAGE_SIZE_TOLERANCE = 0.01
 
 
 def create_argument_parser(description):
-    """共通コマンドライン引数"""
+    """Common command-line arguments."""
     parser = argparse.ArgumentParser(description=description)
 
     parser.add_argument(
         "input",
-        help="入力PDFファイル"
+        help="Input PDF file"
     )
 
     parser.add_argument(
         "-o", "--output",
-        help="出力ファイル（省略時は入力PDFと同じフォルダ）"
+        help="Output file (default: same folder as input PDF)"
     )
 
     parser.add_argument(
         "--dpi",
         type=int,
         default=DEFAULT_DPI,
-        help=f"画像解像度（デフォルト: {DEFAULT_DPI} DPI）"
+        help=f"Image resolution (default: {DEFAULT_DPI} DPI)"
     )
 
     return parser
@@ -38,8 +35,8 @@ def create_argument_parser(description):
 
 def load_config(script_path):
     """
-    スクリプトと同じフォルダにINIを配置する。
-    初回起動時は overwrite=0 で作成する。
+    Place the INI file in the same folder as the script.
+    Create it with overwrite=0 if it does not exist.
     """
     script_path = Path(script_path)
 
@@ -57,7 +54,7 @@ def load_config(script_path):
         with ini_path.open("w", encoding="utf-8") as f:
             config.write(f)
 
-        print(f"INIファイルを作成しました: {ini_path}")
+        print(f"Created INI file: {ini_path}")
 
     config.read(ini_path, encoding="utf-8")
 
@@ -69,78 +66,92 @@ def load_config(script_path):
 
     if value not in ("0", "1"):
         raise ValueError(
-            f"INIファイルのoverwrite設定が不正です: {value}"
+            f"Invalid overwrite setting in INI file: {value}"
         )
 
     return value == "1"
 
 
 def prepare_paths(input_arg, output_arg, output_ext):
-    """入力・出力パスの検証"""
+    """Validate input and output paths."""
 
     input_path = Path(input_arg).expanduser().resolve()
 
     if not input_path.exists():
         raise FileNotFoundError(
-            f"入力ファイルが存在しません: {input_path}"
+            f"Input file does not exist: {input_path}"
         )
 
     if not input_path.is_file():
         raise ValueError(
-            f"入力ファイルが通常のファイルではありません: {input_path}"
+            f"Input path is not a regular file: {input_path}"
         )
 
     if input_path.suffix.lower() != ".pdf":
-        raise ValueError("入力ファイルはPDFを指定してください。")
+        raise ValueError("Input file must be a PDF.")
 
     if output_arg:
         output_path = Path(output_arg).expanduser().resolve()
 
         if output_path.suffix.lower() != output_ext:
             raise ValueError(
-                f"出力ファイルの拡張子は {output_ext} にしてください。"
+                f"Output file extension must be {output_ext}."
             )
     else:
         output_path = input_path.with_suffix(output_ext)
 
     if output_path == input_path:
-        raise ValueError("入力ファイルと出力ファイルが同じです。")
+        raise ValueError("Input and output files must be different.")
 
     if not output_path.parent.exists():
         raise FileNotFoundError(
-            f"出力先フォルダが存在しません: {output_path.parent}"
+            f"Output directory does not exist: {output_path.parent}"
         )
 
     return input_path, output_path
 
 
 def check_output_permission(output_path, overwrite):
-    """出力ファイルの上書き可否確認"""
+    """Check whether the output file can be overwritten."""
 
     if output_path.exists() and not overwrite:
         raise FileExistsError(
-            f"出力ファイルが既に存在します。上書きは禁止されています。\n"
-            f"ファイル: {output_path}\n"
-            f"上書きする場合はINIのoverwrite=1にしてください。"
+            "Output file already exists. Overwriting is disabled.\n"
+            f"File: {output_path}\n"
+            "Set overwrite=1 in the INI file to allow overwriting."
         )
 
 
 def inspect_pdf(pdf_path):
     """
-    PDFの全ページを検査する。
-    全ページが同じサイズであることを確認する。
+    Inspect all PDF pages.
+    Verify that all pages have the same dimensions.
 
-    戻り値:
+    Returns:
         pdfium.PdfDocument
-        ページ幅（pt）
-        ページ高さ（pt）
+        Page width (pt)
+        Page height (pt)
     """
+
+    try:
+        import pypdfium2 as pdfium
+    except ImportError as e:
+        print(f"ERROR: {e}", file=sys.stderr)
+        print(
+            "Install the required library using:",
+            file=sys.stderr
+        )
+        print(
+            "    uv add pypdfium2",
+            file=sys.stderr
+        )
+        raise SystemExit(1)
 
     pdf = pdfium.PdfDocument(str(pdf_path))
 
     if len(pdf) == 0:
         pdf.close()
-        raise ValueError("PDFにページがありません。")
+        raise ValueError("The PDF contains no pages.")
 
     first_page = pdf[0]
 
@@ -164,21 +175,21 @@ def inspect_pdf(pdf_path):
             pdf.close()
 
             raise ValueError(
-                "PDFのページサイズが統一されていません。\n"
-                f"1ページ目: {width:.3f} x {height:.3f} pt\n"
-                f"{index + 1}ページ目: "
+                "PDF page dimensions are inconsistent.\n"
+                f"Page 1: {width:.3f} x {height:.3f} pt\n"
+                f"Page {index + 1}: "
                 f"{current_width:.3f} x {current_height:.3f} pt\n"
-                "全ページが同じ原稿サイズのPDFのみ対応します。"
+                "Only PDFs with identical page dimensions are supported."
             )
 
     return pdf, width, height
 
 
 def render_pdf_pages(pdf, dpi):
-    """PDF全ページを画像化するジェネレータ"""
+    """Generate images from all PDF pages."""
 
     if dpi <= 0:
-        raise ValueError("DPIは1以上を指定してください。")
+        raise ValueError("DPI must be greater than or equal to 1.")
 
     scale = dpi / 72.0
 
@@ -201,16 +212,20 @@ def execute_converter(
     script_path,
     description,
     output_ext,
-    converter
+    converter,
+    version,
+    copyright,
+    author
 ):
-    """共通メイン処理"""
+    """Common conversion process."""
 
     parser = create_argument_parser(description)
+
     args = parser.parse_args()
 
     try:
         if args.dpi <= 0:
-            raise ValueError("--dpiは1以上を指定してください。")
+            raise ValueError("--dpi must be greater than or equal to 1.")
 
         overwrite = load_config(script_path)
 
@@ -228,14 +243,14 @@ def execute_converter(
         pdf, width_pt, height_pt = inspect_pdf(input_path)
 
         try:
-            print(f"入力PDF : {input_path}")
-            print(f"出力先  : {output_path}")
-            print(f"ページ数: {len(pdf)}")
+            print(f"Input PDF : {input_path}")
+            print(f"Output    : {output_path}")
+            print(f"Pages     : {len(pdf)}")
             print(
-                f"原稿サイズ: {width_pt:.3f} x "
+                f"Page size : {width_pt:.3f} x "
                 f"{height_pt:.3f} pt"
             )
-            print(f"解像度: {args.dpi} DPI")
+            print(f"Resolution: {args.dpi} DPI")
 
             converter(
                 pdf,
@@ -248,10 +263,10 @@ def execute_converter(
         finally:
             pdf.close()
 
-        print(f"変換完了: {output_path}")
+        print(f"Conversion completed: {output_path}")
 
     except Exception as exc:
-        print(f"エラー: {exc}", file=sys.stderr)
+        print(f"Error: {exc}", file=sys.stderr)
         return 1
 
     return 0
