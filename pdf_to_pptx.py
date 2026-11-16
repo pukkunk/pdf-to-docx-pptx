@@ -20,7 +20,7 @@ from pdf_converter_common import (
 
 
 __version_short__ = (
-    f"0.0.1, python={platform.python_version()} "
+    f"0.0.2, python={platform.python_version()} "
     f"{platform.architecture()[0]}"
 )
 __version__ = f"{__version_short__}\n"
