@@ -42,12 +42,6 @@ The original layout and Japanese text appearance are preserved. Text and shapes 
 
 Install the project dependencies from the project root directory.
 
-### Using uv
-
-```cmd
-uv sync
-```
-
 ### Using pip
 
 ```cmd
